@@ -30,6 +30,9 @@ public class SecurityConfig {
     
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private JwtAccessDeniedHandler jwtAccessDeniedHandler;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -54,6 +57,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .exceptionHandling(exception -> 
                 exception.authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
             )
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

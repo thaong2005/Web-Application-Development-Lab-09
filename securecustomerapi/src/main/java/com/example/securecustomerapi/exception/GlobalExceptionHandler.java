@@ -50,23 +50,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
     
-    
-    // Handle AccessDeniedException (403)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponseDTO> handleAccessDeniedException(
-            AccessDeniedException ex,
-            WebRequest request) {
-        
-        ErrorResponseDTO error = new ErrorResponseDTO(
-            HttpStatus.FORBIDDEN.value(),
-            "Forbidden",
-            "Access denied. Insufficient permissions.",
-            request.getDescription(false).replace("uri=", "")
-        );
-        
-        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
-    }
-    
     // Handle Validation Errors (400)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> handleValidationException(
