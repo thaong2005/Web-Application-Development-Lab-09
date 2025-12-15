@@ -16,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -103,5 +106,77 @@ public class UserServiceImpl implements UserService {
             user.getIsActive(),
             user.getCreatedAt()
         );
+    }
+    
+    @Override
+    public void changePassword(String username, ChangePasswordDTO changePasswordDTO) {
+        // Get current user
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        
+        // Verify current password
+        if (!passwordEncoder.matches(changePasswordDTO.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+        
+        // Check new password matches confirm
+        if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getConfirmPassword())) {
+            throw new IllegalArgumentException("New password and confirm password do not match");
+        }
+        
+        // Check new password is different from current
+        if (changePasswordDTO.getCurrentPassword().equals(changePasswordDTO.getNewPassword())) {
+            throw new IllegalArgumentException("New password must be different from current password");
+        }
+        
+        // Hash and update password
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+        userRepository.save(user);
+    }
+    
+    @Override
+    public String generatePasswordResetToken(String email) {
+        // Find user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User with this email not found"));
+        
+        // Generate reset token
+        String resetToken = UUID.randomUUID().toString();
+        
+        // Set token and expiry (1 hour)
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+        
+        userRepository.save(user);
+        
+        // In real app, send email with reset link
+        // For now, just return the token
+        return resetToken;
+    }
+    
+    @Override
+    public void resetPassword(ResetPasswordDTO resetPasswordDTO) {
+        // Find user by reset token
+        User user = userRepository.findByResetToken(resetPasswordDTO.getResetToken())
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid reset token"));
+        
+        // Check if token is expired
+        if (user.getResetTokenExpiry() == null || LocalDateTime.now().isAfter(user.getResetTokenExpiry())) {
+            throw new IllegalArgumentException("Reset token has expired");
+        }
+        
+        // Check passwords match
+        if (!resetPasswordDTO.getNewPassword().equals(resetPasswordDTO.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+        
+        // Update password
+        user.setPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
+        
+        // Clear reset token
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        
+        userRepository.save(user);
     }
 }
