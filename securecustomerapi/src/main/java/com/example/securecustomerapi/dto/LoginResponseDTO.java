@@ -7,6 +7,7 @@ public class LoginResponseDTO {
     private String username;
     private String email;
     private String role;
+    private String refreshToken;
     
     public LoginResponseDTO() {
     }
@@ -16,6 +17,14 @@ public class LoginResponseDTO {
         this.username = username;
         this.email = email;
         this.role = role;
+    }
+    
+    public LoginResponseDTO(String token, String username, String email, String role, String refreshToken) {
+        this.token = token;
+        this.username = username;
+        this.email = email;
+        this.role = role;
+        this.refreshToken = refreshToken;
     }
     
     // Getters and Setters
@@ -57,5 +66,13 @@ public class LoginResponseDTO {
     
     public void setRole(String role) {
         this.role = role;
+    }
+    
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+    
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

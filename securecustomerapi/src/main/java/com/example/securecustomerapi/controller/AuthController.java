@@ -20,6 +20,7 @@ import com.example.securecustomerapi.dto.ChangePasswordDTO;
 import com.example.securecustomerapi.dto.ForgotPasswordDTO;
 import com.example.securecustomerapi.dto.LoginRequestDTO;
 import com.example.securecustomerapi.dto.LoginResponseDTO;
+import com.example.securecustomerapi.dto.RefreshTokenDTO;
 import com.example.securecustomerapi.dto.RegisterRequestDTO;
 import com.example.securecustomerapi.dto.ResetPasswordDTO;
 import com.example.securecustomerapi.dto.UserResponseDTO;
@@ -97,6 +98,13 @@ public class AuthController {
         
         Map<String, String> response = new HashMap<>();
         response.put("message", "Password reset successfully");
+        return ResponseEntity.ok(response);
+    }
+    
+    // EXERCISE 9.3: Refresh Access Token
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenDTO dto) {
+        LoginResponseDTO response = userService.refreshAccessToken(dto.getRefreshToken());
         return ResponseEntity.ok(response);
     }
 }
